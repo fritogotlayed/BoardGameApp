@@ -1,0 +1,16 @@
+1. Do we want multiple users
+  a. do we need to handle authentication and authorization
+2. CRUD - Create Read Update and Delete
+  a. board games
+
+
+What do we want to track about a board game
+  - title
+  - minimum number of players
+  - maximum number of players
+  - minimum age of players
+  - maximum age of players
+  - Avg. game time
+  - type
+  - genre
+  - number times played

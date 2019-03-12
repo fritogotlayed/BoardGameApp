@@ -1,0 +1,10 @@
+---
+flask:
+  debug: false
+  host: 0.0.0.0
+  port: 8080
+
+arango:
+  url: http://127.0.0.1:8529
+  user: root
+  pass: pwd4arango
