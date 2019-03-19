@@ -32,7 +32,8 @@ def build_app(override_config=None):
     :rtype: flask.Flask
     """
     app = flask.Flask('BoardGameApi')
-    config = yaml.load(open(CURRENT_DIR + 'config.yaml'))
+    config = yaml.load(open(CURRENT_DIR + 'config.yaml'),
+                       Loader=yaml.FullLoader)
 
     if override_config:
         # TODO: Verify this merges child items of dictionaries
