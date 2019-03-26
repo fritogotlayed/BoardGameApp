@@ -1,6 +1,7 @@
 from datetime import datetime
-from flask import Blueprint, Response, current_app, request
+from flask import Blueprint, Response, current_app, request, jsonify
 from board_game_api import repos
+import json
 
 MOD = Blueprint('game', __name__, url_prefix='/game')
 
@@ -11,23 +12,82 @@ def add_game():
         conn = current_app.arango_conn
         db = repos.get_database(conn, 'BoardGameDB')
         col = repos.get_collection(db, 'games')
-        # doc = repos.get_document_by_key(db, col, 'health-check')
-        #
-        # if doc:
-        #     doc.delete()
-        #
-        # doc = col.createDocument({
-        #     '_key': 'health-check',
-        #     'ts': datetime.utcnow()
-        # })
-        # doc.save()
 
         data = request.get_json()
         issues = _validate_add_game(data)
         if issues:
-            return Response(issues, status=403)
+            resp_obj = {"errors": issues}
+            return Response(json.dumps(resp_obj),
+                            mimetype='application/json',
+                            status=400)
         else:
-            return Response('', status=200)
+            doc = col.createDocument({
+                '_key': repos.keyify_value(data['title']),
+                'title': data['title'],
+                'minPlayers': data['minPlayers'],
+                'maxPlayers': data['maxPlayers'],
+                'added': datetime.utcnow()
+            })
+            doc.save()
+            return Response('OK', status=200)
+    except Exception as ex:
+        # TODO: internally log this
+        print(str(ex))
+        return Response('ERROR: 101', status=500)
+
+
+@MOD.route('/<key>')
+def get_game(key):
+    try:
+        conn = current_app.arango_conn
+        db = repos.get_database(conn, 'BoardGameDB')
+        col = repos.get_collection(db, 'games')
+
+        data_key = repos.keyify_value(key)
+        data_item = repos.get_document_by_key(db, col, data_key,
+                                              raw_results=True,
+                                              scrub_results=True)
+
+        if data_item:
+            return Response(json.dumps(data_item),
+                            mimetype='application/json',
+                            status=200)
+        else:
+            resp_obj = {"errors": ["not found"]}
+            return Response(json.dumps(resp_obj),
+                            mimetype='application/json',
+                            status=404)
+    except Exception as ex:
+        # TODO: internally log this
+        print(str(ex))
+        return Response('ERROR: 101', status=500)
+
+
+@MOD.route('')
+def search_games():
+    try:
+        search_title = request.args.get('title')
+        search_min_player = request.args.get('minPlayer')
+        search_max_player = request.args.get('maxPlayer')
+
+        conn = current_app.arango_conn
+        db = repos.get_database(conn, 'BoardGameDB')
+        col = repos.get_collection(db, 'games')
+
+        results = repos.search_documents(db, col,
+                                         raw_result=True,
+                                         scrub_result=True,
+                                         **request.args)
+
+        if results:
+            return Response(json.dumps({"data": results}),
+                            mimetype='application/json',
+                            status=200)
+        else:
+            resp_obj = {"data": []}
+            return Response(json.dumps(resp_obj),
+                            mimetype='application/json',
+                            status=200)
     except Exception as ex:
         # TODO: internally log this
         print(str(ex))
@@ -51,9 +111,11 @@ def _validate_add_game(data):
     for key in required_keys:
         if key not in data:
             issues.append('Key "{0}" missing.'.format(key))
+        elif not data[key]:
+            issues.append('Key "{0}" cannot have blank value'.format(key))
 
     if 'title' in data:
-        data_key = data['title'].lower().replace(' ', '-')
+        data_key = repos.keyify_value(data['title'])
         data_item = repos.get_document_by_key(db, col, data_key)
         if data_item:
             issues.append('Cannot add game as it already exists.')
