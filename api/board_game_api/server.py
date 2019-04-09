@@ -57,9 +57,16 @@ def setup_arango_connection(app):
     app.arango_conn = conn
 
 
+def after_request(response):
+    response.headers['Access-Control-Allow-Origin'] = '*'
+    return response
+
+
 def start_server(override_config=None):
     app = build_app(override_config)
     setup_arango_connection(app)
+
+    app.after_request(after_request)
 
     config = app.app_config  # type: dict
 

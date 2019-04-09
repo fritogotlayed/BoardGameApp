@@ -29,7 +29,6 @@ class Header extends Component {
                                 borderBottomRightRadius: '50%',
                                 marginRight: 15
                             }}
-                            src="https://media-exp2.licdn.com/mpr/mpr/shrinknp_400_400/AAEAAQAAAAAAAAU3AAAAJGE1MzYxNzYzLTE1NTUtNDEyYi04MzRjLTgzZjNkOGU0MGIzNg.jpg"
                             width="30px" alt="" />
                         <span>Board Game</span>
                     </NavLink>
@@ -41,12 +40,13 @@ class Header extends Component {
                 </div>
                 <div className={this.state.isActive ? 'navbar-menu is-active' : 'navbar-menu'}>
                     <div className="navbar-start">
-                        <NavLink className="navbar-item" to="/blog" activeClassName="is-active">
+                        <NavLink className="navbar-item" to="/search" activeClassName="is-active">
                             <span className="icon has-text-primary" style={{ marginRight: 5 }}>
-                                <i className="fas fa-code"></i>
+                                <i className="fas fa-search"></i>
                             </span>
-                            Code Blog
+                            Search
                         </NavLink>
+                        {/*
                         <a className="navbar-item">
                             <span className="icon" style={{ marginRight: 5 }}>
                                 <i className="fab fa-lg fa-medium"></i>
@@ -70,7 +70,9 @@ class Header extends Component {
                                 </a>
                             </div>
                         </div>
+                        */}
                     </div>
+                    {/*
                     <div className="navbar-end">
                         <a className="navbar-item" href="https://github.com/aaronklaser">
                             <span className="icon">
@@ -89,6 +91,7 @@ class Header extends Component {
                             </span>
                         </a>
                     </div>
+                    */}
                 </div>
             </nav>
         )
