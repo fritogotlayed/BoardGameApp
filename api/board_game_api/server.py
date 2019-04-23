@@ -59,6 +59,7 @@ def setup_arango_connection(app):
 
 def after_request(response):
     response.headers['Access-Control-Allow-Origin'] = '*'
+    response.headers['Access-Control-Allow-Headers'] = '*'
     return response
 
 
