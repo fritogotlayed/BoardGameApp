@@ -36,6 +36,36 @@ def add_game():
         return Response('ERROR: 101', status=500)
 
 
+@MOD.route('/<key>/delete', methods=['DELETE'])
+def delete_game(key):
+    try:
+        conn = current_app.arango_conn
+        db = repos.get_database(conn, 'BoardGameDB')
+        col = repos.get_collection(db, 'games')
+
+        data_key = repos.keyify_value(key)
+        data_item = repos.get_document_by_key(db, col, data_key,
+                                              raw_results=False,
+                                              scrub_results=False)
+
+        if data_item:
+            data_item.delete()
+            resp_obj = {"status": "deleted"}
+            return Response(json.dumps(resp_obj),
+                            mimetype='application/json',
+                            status=200)
+        else:
+            resp_obj = {"errors": ["not found"]}
+            return Response(json.dumps(resp_obj),
+                            mimetype='application/json',
+                            status=404)
+
+    except Exception as ex:
+        # TODO: internally log this
+        print(str(ex))
+        return Response('ERROR: 101', status=500)
+
+
 @MOD.route('/<key>')
 def get_game(key):
     try:

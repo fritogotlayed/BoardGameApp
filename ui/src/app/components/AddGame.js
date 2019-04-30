@@ -17,10 +17,10 @@ class AddGame extends Component {
         this.addGame = this.addGame.bind(this)
         this.clearForm = this.clearForm.bind(this)
         this.closeError = this.closeError.bind(this)
+        this.cancelClick = this.cancelClick.bind(this)
     }
 
     onChange = function (e) {
-        console.log(this)
         this.setState({ [e.target.name]: e.target.value })
     }
 
@@ -33,7 +33,9 @@ class AddGame extends Component {
 
         axios.post('http://127.0.0.1:8080/game/add', data).then((resp) => {
             this.clearForm()
-            this.props.onGameAdded()
+            if (this.props.onGameAdded) {
+                this.props.onGameAdded()
+            }
         }).catch((err) => {
             this.setState({errorMessage: 'There was a problem adding your board game'})
         })
@@ -46,6 +48,13 @@ class AddGame extends Component {
             minPlayers: '',
             errorMessage: ''
         })
+    }
+
+    cancelClick = () => {
+        this.clearForm()
+        if (this.props.onCancelClicked) {
+            this.props.onCancelClicked()
+        }
     }
 
     closeError = () => {
@@ -94,7 +103,7 @@ class AddGame extends Component {
                         <button className="button is-link" onClick={this.addGame}>Submit</button>
                     </div>
                     <div className="control">
-                        <button className="button is-text" onClick={this.clearForm}>Cancel</button>
+                        <button className="button is-text" onClick={this.cancelClick}>Cancel</button>
                     </div>
                 </div>
             </div>)
