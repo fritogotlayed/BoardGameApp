@@ -1,2 +1,5 @@
 # General OS stuff
 .directory
+
+# App Docker Data
+arango-data/

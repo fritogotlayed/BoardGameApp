@@ -47,16 +47,16 @@ class Search extends Component {
                         {this.props.data.map(elem => {
                             return <tr key={elem._key}>
                                 <td>
-                                <a className="button" onClick={this.onEditClick.bind(this, elem._key)}>
+                                <button className="button" onClick={this.onEditClick.bind(this, elem._key)}>
                                     <span className="icon is-small">
                                         <i className="fas fa-edit" title="edit"></i>
                                     </span>
-                                </a>
-                                <a className="button" onClick={this.onDeleteClick.bind(this, elem._key)}>
+                                </button>
+                                <button className="button" onClick={this.onDeleteClick.bind(this, elem._key)}>
                                     <span className="icon is-small">
                                         <i className="fas fa-trash" title="delete"></i>
                                     </span>
-                                </a>
+                                </button>
                                 </td>
                                 <td>{elem.title}</td>
                                 <td>{elem.minPlayers}</td>

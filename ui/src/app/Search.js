@@ -2,11 +2,13 @@ import React, { Component } from 'react'
 import axios from 'axios'
 import GameGrid from './components/GameGrid'
 import AddGame from './components/AddGame'
+import EditGame from './components/EditGame'
 
 class Search extends Component {
     state = {
         data: [],
-        addingGame: false
+        addingGame: false,
+        editedGame: null
     }
 
     constructor() {
@@ -31,7 +33,7 @@ class Search extends Component {
     }
 
     hideModal = () => {
-        this.setState({addingGame: false})
+        this.setState({addingGame: false, editedGame: null})
     }
 
     gameAdded = () => {
@@ -39,7 +41,19 @@ class Search extends Component {
         this.loadGrid()
     }
 
-    onGridRowEdit = () => {
+    gameEdited = () => {
+        this.hideModal()
+        this.loadGrid()
+    }
+
+    onGridRowEdit = (key) => {
+        var editedItem = this.state.data.find((elem) => {
+            return elem._key === key
+        })
+
+        if (editedItem) {
+            this.setState({editedGame: editedItem})
+        }
     }
 
     onGridRowDelete = (key) => {
@@ -63,6 +77,18 @@ class Search extends Component {
                     <div className="modal-content">
                         <div className="box">
                             <AddGame onGameAdded={this.gameAdded} onCancelClicked={this.hideModal} />
+                        </div>
+                    </div>
+                    <button className="modal-close is-large" aria-label="close" onClick={this.hideModal}></button>
+                </div>
+            )
+        } else if (this.state.editedGame) {
+            modal = (
+                <div className="modal is-active">
+                    <div className="modal-background"></div>
+                    <div className="modal-content">
+                        <div className="box">
+                            <EditGame gameToEdit={this.state.editedGame} onGameEdited={this.gameEdited} onCancelClicked={this.hideModal} />
                         </div>
                     </div>
                     <button className="modal-close is-large" aria-label="close" onClick={this.hideModal}></button>

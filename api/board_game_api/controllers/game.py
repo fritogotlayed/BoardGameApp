@@ -36,6 +36,37 @@ def add_game():
         return Response('ERROR: 101', status=500)
 
 
+@MOD.route('<key>/edit', methods=['POST'])
+def edit_game(key):
+    try:
+        conn = current_app.arango_conn
+        db = repos.get_database(conn, 'BoardGameDB')
+        col = repos.get_collection(db, 'games')
+
+        data = request.get_json()
+        issues = _validate_edit_game(data)
+        if issues:
+            resp_obj = {"errors": issues}
+            return Response(json.dumps(resp_obj),
+                            mimetype='application/json',
+                            status=400)
+        else:
+            data_key = repos.keyify_value(key)
+            data_item = repos.get_document_by_key(db, col, data_key,
+                                                  raw_results=False,
+                                                  scrub_results=False)
+
+            data_item['minPlayers'] = data['minPlayers']
+            data_item['maxPlayers'] = data['maxPlayers']
+            data_item['updated'] = datetime.utcnow()
+            data_item.save()
+            return Response('OK', status=200)
+    except Exception as ex:
+        # TODO: internally log this
+        print(str(ex))
+        return Response('ERROR: 101', status=500)
+
+
 @MOD.route('/<key>/delete', methods=['DELETE'])
 def delete_game(key):
     try:
@@ -130,12 +161,30 @@ def _validate_add_game(data):
     :type data: dict
     :rtype: list
     """
+    required_keys = ['title', 'minPlayers', 'maxPlayers']
+    return _validate_game_data(data, required_keys)
+
+
+def _validate_edit_game(data):
+    """
+
+    :type data: dict
+    :rtype: list
+    """
+    required_keys = ['minPlayers', 'maxPlayers']
+    return _validate_game_data(data, required_keys)
+
+
+def _validate_game_data(data, required_keys):
+    """
+
+    :type data: dict
+    :rtype: list
+    """
     issues = []
     conn = current_app.arango_conn
     db = repos.get_database(conn, 'BoardGameDB')
     col = repos.get_collection(db, 'games')
-
-    required_keys = ['title', 'minPlayers', 'maxPlayers']
 
     # Validate minimum data for payload
     for key in required_keys:
