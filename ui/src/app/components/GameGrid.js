@@ -24,7 +24,7 @@ class Search extends Component {
     render() {
         return (
             <div>
-                <table className="table is-striped">
+                <table className="table is-striped" style={this.props.style}>
                     <thead>
                         <tr>
                             <th>Actions</th>

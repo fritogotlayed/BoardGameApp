@@ -1,6 +1,7 @@
 import React, { Component } from 'react'
 import axios from 'axios'
 import GameGrid from './components/GameGrid'
+import GameGridFilter from './components/GameGridFilter'
 import AddGame from './components/AddGame'
 import EditGame from './components/EditGame'
 
@@ -20,10 +21,19 @@ class Search extends Component {
         this.gameAdded = this.gameAdded.bind(this)
         this.onGridRowDelete = this.onGridRowDelete.bind(this)
         this.onGridRowEdit = this.onGridRowEdit.bind(this)
+        this.onFilterApplied = this.onFilterApplied.bind(this)
     }
 
-    loadGrid = () => {
-        fetch('http://127.0.0.1:8080/game')
+    loadGrid = (filter) => {
+        let filterQuery = ''
+        if (filter) {
+            filterQuery += '?'
+            if (filter['title']) {
+                filterQuery += 'title=' + escape(filter['title'])
+            }
+        }
+
+        fetch('http://127.0.0.1:8080/game' + filterQuery)
             .then(response => response.json())
             .then(data => this.setState({ data: data.data }));
     }
@@ -64,6 +74,10 @@ class Search extends Component {
         })
     }
 
+    onFilterApplied = (data) => {
+        this.loadGrid(data)
+    }
+
     componentDidMount() {
         this.loadGrid()
     }
@@ -97,10 +111,15 @@ class Search extends Component {
         }
 
         return (
-            <div>
+            <div style={{'marginLeft': '5%', 'width': '90%'}}>
                 {modal}
-                <button className="button is-primary" onClick={this.showModal}>Add Game</button>
-                <GameGrid data={this.state.data} onDeleteClick={this.onGridRowDelete} onEditClick={this.onGridRowEdit} />
+                <GameGridFilter onFilterApplied={this.onFilterApplied}/>
+                <GameGrid style={{'width': '100%'}} data={this.state.data} onDeleteClick={this.onGridRowDelete} onEditClick={this.onGridRowEdit} />
+                <div className="field is-grouped is-grouped-right">
+                    <p className="control">
+                        <button className="button is-primary" onClick={this.showModal}>Add Game</button>
+                    </p>
+                </div>
             </div>
         )
     }

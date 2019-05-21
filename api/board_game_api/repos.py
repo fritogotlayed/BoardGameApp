@@ -95,6 +95,7 @@ def search_documents(db, col, raw_result=False, scrub_result=False, **kwargs):
     :rtype: Document
     """
     aql = 'FOR d in ' + col.name
+    bind_vars = {}
     if kwargs:
         aql += ' FILTER '
         count = 0
@@ -103,16 +104,18 @@ def search_documents(db, col, raw_result=False, scrub_result=False, **kwargs):
                 aql += ' AND '
 
             if isinstance(kwargs[key], str):
+                bind_vars[key] = '%' + str(kwargs[key]) + '%'
                 aql += ('TRIM(UPPER(d.' + key +
-                        ')) == TRIM(UPPER(@' + key + '))')
+                        ')) LIKE TRIM(UPPER(@' + key + '))')
             else:
+                bind_vars[key] = kwargs[key]
                 aql += 'd.' + key + ' == @' + key
 
             count = count + 1
 
     aql += ' RETURN d'
 
-    result = db.AQLQuery(aql, bindVars=kwargs, rawResults=raw_result)
+    result = db.AQLQuery(aql, bindVars=bind_vars, rawResults=raw_result)
 
     if scrub_result:
         new_result = []
