@@ -103,13 +103,21 @@ def search_documents(db, col, raw_result=False, scrub_result=False, **kwargs):
             if count > 0:
                 aql += ' AND '
 
-            if isinstance(kwargs[key], str):
-                bind_vars[key] = '%' + str(kwargs[key]) + '%'
-                aql += ('TRIM(UPPER(d.' + key +
-                        ')) LIKE TRIM(UPPER(@' + key + '))')
+            if isinstance(kwargs[key]['value'], str):
+                bind_vars[key] = '%' + str(kwargs[key]['value']) + '%'
+                if kwargs[key]['op'] == 'like':
+                    aql += ('TRIM(UPPER(d.' + key +
+                            ')) LIKE TRIM(UPPER(@' + key + '))')
+                else:
+                    raise Exception('unknown operation: ' + kwargs[key]['op'])
             else:
-                bind_vars[key] = kwargs[key]
-                aql += 'd.' + key + ' == @' + key
+                bind_vars[key] = kwargs[key]['value']
+                if kwargs[key]['op'] == 'lt-eq':
+                    aql += 'd.' + key + ' <= @' + key
+                elif kwargs[key]['op'] == 'gt-eq':
+                    aql += 'd.' + key + ' >= @' + key
+                else:
+                    raise Exception('unknown operation: ' + kwargs[key]['op'])
 
             count = count + 1
 

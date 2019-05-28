@@ -31,6 +31,22 @@ class Search extends Component {
             if (filter['title']) {
                 filterQuery += 'title=' + escape(filter['title'])
             }
+
+            if (filter['maxPlayers']) {
+                if (filter['title']) {
+                    filterQuery += '&'
+                }
+
+                filterQuery += 'maxPlayers=' + escape(filter['maxPlayers'])
+            }
+
+            if (filter['minPlayers']) {
+                if (filter['maxPlayers']) {
+                    filterQuery += '&'
+                }
+
+                filterQuery += 'minPlayers=' + escape(filter['minPlayers'])
+            }
         }
 
         fetch('http://127.0.0.1:8080/game' + filterQuery)

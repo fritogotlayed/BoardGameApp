@@ -24,8 +24,8 @@ def add_game():
             doc = col.createDocument({
                 '_key': repos.keyify_value(data['title']),
                 'title': data['title'],
-                'minPlayers': data['minPlayers'],
-                'maxPlayers': data['maxPlayers'],
+                'minPlayers': int(data['minPlayers']),
+                'maxPlayers': int(data['maxPlayers']),
                 'added': datetime.utcnow()
             })
             doc.save()
@@ -128,17 +128,34 @@ def get_game(key):
 def search_games():
     try:
         search_title = request.args.get('title')
-        search_min_player = request.args.get('minPlayer')
-        search_max_player = request.args.get('maxPlayer')
+        search_min_player = request.args.get('minPlayers')
+        search_max_player = request.args.get('maxPlayers')
 
         conn = current_app.arango_conn
         db = repos.get_database(conn, 'BoardGameDB')
         col = repos.get_collection(db, 'games')
 
+        args = {}
+        if search_title:
+            args['title'] = {
+                'value': search_title,
+                'op': 'like'
+            }
+        if search_min_player:
+            args['minPlayers'] = {
+                'value': int(search_min_player),
+                'op': 'gt-eq'
+            }
+        if search_max_player:
+            args['maxPlayers'] = {
+                'value': int(search_max_player),
+                'op': 'lt-eq'
+            }
+
         results = repos.search_documents(db, col,
                                          raw_result=True,
                                          scrub_result=True,
-                                         **request.args)
+                                         **args)
 
         if results:
             return Response(json.dumps({"data": results}),
@@ -162,7 +179,9 @@ def _validate_add_game(data):
     :rtype: list
     """
     required_keys = ['title', 'minPlayers', 'maxPlayers']
-    return _validate_game_data(data, required_keys)
+    issues = _validate_game_data(data, required_keys)
+    _validate_game_players_values(data, issues)
+    return issues
 
 
 def _validate_edit_game(data):
@@ -172,7 +191,26 @@ def _validate_edit_game(data):
     :rtype: list
     """
     required_keys = ['minPlayers', 'maxPlayers']
-    return _validate_game_data(data, required_keys)
+    issues = _validate_game_data(data, required_keys)
+    _validate_game_players_values(data, issues)
+    return issues
+
+
+def _validate_game_players_values(data, issues):
+    min_players = -1
+    max_players = -1
+    try:
+        min_players = int(data['minPlayers'])
+    except ValueError:
+        issues.append('Could not parse minPlayers')
+
+    try:
+        max_players = int(data['maxPlayers'])
+    except ValueError:
+        issues.append('Could not parse maxPlayers')
+
+    if min_players != -1 and max_players != -1 and max_players < min_players:
+        issues.append('minPlayers must equal to or less than max players')
 
 
 def _validate_game_data(data, required_keys):
