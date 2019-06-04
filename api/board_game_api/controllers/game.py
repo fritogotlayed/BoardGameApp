@@ -210,7 +210,7 @@ def _validate_game_players_values(data, issues):
         issues.append('Could not parse maxPlayers')
 
     if min_players != -1 and max_players != -1 and max_players < min_players:
-        issues.append('minPlayers must equal to or less than max players')
+        issues.append('min players must equal to or less than max players')
 
 
 def _validate_game_data(data, required_keys):

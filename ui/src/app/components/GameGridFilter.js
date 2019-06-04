@@ -75,7 +75,7 @@ class GameGridFilter extends Component {
                         <button className="button is-text" onClick={this.clearForm}>Clear</button>
                     </div>
                     <div className="control">
-                        <button className="button is-link" onClick={this.filterApplied}>Filter</button>
+                        <button className="button is-link" onClick={this.filterApplied}>Apply</button>
                     </div>
                 </div>
             </div>)

@@ -15,7 +15,7 @@ class ErrorNotification extends Component {
         return (
             <div>
                 <div class="notification is-danger">
-                    <button class="delete" onClick={this.onClose}></button>
+                    <button className="delete" onClick={this.onClose}></button>
                     {this.props.message}
                 </div>
             </div>)

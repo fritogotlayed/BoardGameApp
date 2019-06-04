@@ -7,7 +7,7 @@ class AddGame extends Component {
         title: '',
         maxPlayers: '',
         minPlayers: '',
-        errorMessage: ''
+        errors: null
     }
 
     constructor() {
@@ -37,7 +37,9 @@ class AddGame extends Component {
                 this.props.onGameAdded()
             }
         }).catch((err) => {
-            this.setState({errorMessage: 'There was a problem adding your board game'})
+            debugger
+            var data = err.response.data
+            this.setState({errors: data.errors})
         })
     }
 
@@ -46,7 +48,7 @@ class AddGame extends Component {
             title: '',
             maxPlayers: '',
             minPlayers: '',
-            errorMessage: ''
+            errors: null
         })
     }
 
@@ -58,13 +60,25 @@ class AddGame extends Component {
     }
 
     closeError = () => {
-        this.setState({errorMessage: ''})
+        this.setState({errors: null})
     }
 
     render() {
         let errorNotification = null
-        if (this.state.errorMessage) {
-            errorNotification = <ErrorNotification message={this.state.errorMessage} onClose={this.closeError} />
+        if (this.state.errors) {
+            let errorBlock = (
+                <div>
+                    <p>There was a problem adding your board game</p>
+                    <ul style={{"margin-top": 16, "margin-bottom": 16, "list-style-type": "disc", "padding-left": 40}}>
+                        {this.state.errors.map(elem => {
+                            return <li>
+                                {elem}
+                            </li>
+                        })}
+                    </ul>
+                </div>
+            )
+            errorNotification = <ErrorNotification message={errorBlock} onClose={this.closeError} />
         }
 
         return (
